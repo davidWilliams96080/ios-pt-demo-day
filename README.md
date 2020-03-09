@@ -16,11 +16,11 @@
 
 ## Links
 
-* Github Code: `<insert Github repository link here>`
-* Github Proposal: `<insert Proposal Pull Request here>`
-* Trello/Github Project Kanban: `<insert trello board here>`
+* Github Code: https://github.com/iOSPT5-BW1/Ad-Libs/pull/7
+* Github Proposal: https://github.com/LambdaSchool/ios-build-sprint-project-proposal/pull/70
+* Trello/Github Project Kanban: https://www.notion.so/5ed6f4c98b33493b92368d2a17452a00?v=cd332a0244a246e3a998f4cd3c9b0e7d
 * Test Flight Signup (Recommended): `<insert beta signup link here>`
-* YouTube demo video (Recommended): `<insert video url here>`
+* YouTube demo video (Recommended): https://youtu.be/S2UgdrnNV-4
 
 ## Hero Image
 
@@ -34,23 +34,155 @@
 
 2. What was your #1 obstacle or bug that you fixed? How did you fix it?
 
-    `<Your answer here>`
+    `Switching between a new adlib and an existing one pulled from the tableView.  this was fixed by implementng a .state check for which the user was coming from.
   
 3. Share a chunk of code (or file) you're proud of and explain why.
 
-    `<Your answer here>`
+The theme settings file from the app, where the user can select a color from a picker and it auto-updates when landing on the selection, as well as the persistent selection of which story (only during the running of the app)the user chose to run with:
+(I would like to make this more elegant and move the selection process to a helper file but am struggling with the 'view.backgroundColor' mode from within a non-Cocoa Touch Class file as of yet.
+
+    import UIKit
+
+protocol ThemeSelectedDelegate {
+    func themeChosen()
+}
+class SettingsViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
+    var pickerData = ["Blue", "Cyan", "Dark", "Gray", "Green","Light", "Orange", "Purple", "Teal", "Yellow"]
+    
+    @IBOutlet weak var themePicker: UIPickerView!
+    @IBOutlet weak var story1Button: UIButton!
+    @IBOutlet weak var story2Button: UIButton!
+    @IBOutlet weak var story3Button: UIButton!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        themePicker.delegate = self
+        themePicker.selectRow(Settings.shared.changeBackground, inComponent:
+            0, animated: true)
+        themePicker.backgroundColor = UIColor(white: 1, alpha: 0.35)
+        themePicker.layer.borderColor = UIColor.white.cgColor
+        themePicker.layer.borderWidth = 2.5
+        themePicker.layer.cornerRadius = 7.5
+        customizeButtons(sender: 0)
+        
+        updateViews()
+    }
+    
+    func customizeButtons(sender: Int) {
+          Settings.shared.storyChanged = true
+        switch sender {
+        case 0:
+            story1Button.layer.borderColor = UIColor.red.cgColor
+            story1Button.layer.borderWidth = 2.5
+            story1Button.layer.cornerRadius = 8.0
+            story1Button.backgroundColor = UIColor.init(red: 255/255, green: 0/255, blue: 0/255, alpha: 0.55)
+            story2Button.layer.borderColor = UIColor.clear.cgColor
+            story3Button.layer.borderColor = UIColor.clear.cgColor
+            story2Button.backgroundColor = .clear
+            story3Button.backgroundColor = .clear
+            Settings.shared.story = .story1
+        case 1:
+            story2Button.layer.borderColor = UIColor.red.cgColor
+            story2Button.layer.borderWidth = 2.5
+            story2Button.layer.cornerRadius = 8.0
+            story2Button.backgroundColor = UIColor.init(red: 255/255, green: 0/255, blue: 0/255, alpha: 0.55)
+            story1Button.layer.borderColor = UIColor.clear.cgColor
+            story3Button.layer.borderColor = UIColor.clear.cgColor
+            story1Button.backgroundColor = .clear
+            story3Button.backgroundColor = .clear
+            Settings.shared.story = .story2
+        case 2:
+            story3Button.layer.borderColor = UIColor.red.cgColor
+            story3Button.layer.borderWidth = 2.5
+            story3Button.layer.cornerRadius = 8.0
+            story3Button.backgroundColor = UIColor.init(red: 255/255, green: 0/255, blue: 0/255, alpha: 0.55)
+            story1Button.layer.borderColor = UIColor.clear.cgColor
+            story2Button.layer.borderColor = UIColor.clear.cgColor
+            story1Button.backgroundColor = .clear
+            story2Button.backgroundColor = .clear
+            Settings.shared.story = .story3
+
+        default:
+            break
+        }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
+        setTheme()
+    }
+    
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        1
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        pickerData.count
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return pickerData[row]
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        Settings.shared.changeBackground = themePicker.selectedRow(inComponent: 0)
+        UserDefaults.standard.set(Settings.shared.changeBackground, forKey: "themeSet")
+        setTheme()
+    }
+    
+    func setTheme() {
+        switch Settings.shared.changeBackground {
+        case 0:
+            view.backgroundColor = .blue
+        case 1:
+            view.backgroundColor = UIColor(red: 129/255, green: 194/255, blue: 183/255, alpha: 1.0)
+        case 2:
+            view.backgroundColor = .darkGray
+        case 3:
+            view.backgroundColor = .systemGray3
+        case 4:
+            view.backgroundColor = .systemGreen
+        case 5:
+            view.backgroundColor = .lightGray
+        case 6:
+            view.backgroundColor = .systemOrange
+        case 7:
+            view.backgroundColor = .systemPurple
+        case 8:
+            view.backgroundColor = .systemTeal
+        case 9:
+            view.backgroundColor = .yellow
+        default:
+            break
+        }
+    }
+    
+    func updateViews() {
+        setTheme()
+    }
+    
+    @IBAction func storySelectButtonPressed(_ sender: UIButton) {
+      
+        if Settings.shared.storyChanged {
+        customizeButtons(sender: sender.tag)
+        } else if !Settings.shared.storyChanged {
+            customizeButtons(sender: 0)
+        }
+    }
+}
+
   
 4. What is your elevator pitch? (30 second description your Grandma or a 5-year old would understand)
 
-    `<Your answer here>`
+    Want to have fun when bored? PLay this ad-lib game that makes funny sentences from words you give or random ones, with cool colors to boot!
   
 5. What is your #1 feature?
 
-    `<Your answer here>`
+    The randomizer within that randomly picks an ad-lib story with randomly generated words that fill in.
   
 6. What are you future goals?
 
-    `<Your answer here>`
+    We would like to have more stories to choose from, grow the words picked from from words entered by the user, and graphics where, utilizing SpriteKit maybe, that the words POOF into each spot!
 
 ## Required Slides (Add your Keynote to your PR)
 
